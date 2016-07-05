@@ -1,6 +1,7 @@
 #include <iostream> 
 #include <windows.h> //Agregado para cambiar el color
 #include <cmath> //Funciones matematicas: sqrt
+#include <string>
 
 /*
  * Programar un encriptador de palabras mediante el metodo RSA,
@@ -9,7 +10,10 @@
  * de recuperar el mensaje original
  * */
 
-using namespace std;
+using namespace std; 
+using std::string; 
+
+string alfabeto( "&&ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz 0123456789" ); 
 
 //Cambiar el color de las letras
 void color( int X ){ 
@@ -198,10 +202,40 @@ unsigned long long  Exponenciacion_Zn(unsigned long long  a,unsigned long long  
 	[1] = Clave Privada.
 	[2] = Mensaje encriptado.
 */
-long*encriptar(long mensaje){
-	long array[3], cifrado=0, productoPrimos=0, exponenteClavePrivada=0;
-	
-	while( cifrado == 0 || productoPrimos < 0 || exponenteClavePrivada < 0 ){
+
+int get_pos( string str, char elemento ){
+	for( int i = 0; i<str.size(  ); i++ ){
+  		if( str.at( i ) == elemento ){
+      		return i;
+	  	}
+  	}
+   	return -1;    
+}
+
+//El espacio no se cuenta asi que hay que eliminbarlo
+string  validar_mensaje( string texto_plano ){
+	string texto_plano_valido = ""; 
+  
+	//Eliminamos los espacios del texto plano
+  	for( int i = 0; i < texto_plano.size(); i++ ){
+  		if( texto_plano.at( i ) != ' ' ){
+  			texto_plano_valido += texto_plano.at( i ); 
+		}
+	}
+          
+ 	//Completamos con x al final para que sea potencia de 2
+   	int tam = texto_plano_valido.size(); 
+   	if( tam % 2 != 0 ){
+   		texto_plano_valido += "x";	
+	}
+    
+	return texto_plano_valido; 
+}
+
+void encriptar(string mensaje){
+	long cifrado=0, productoPrimos=0, exponenteClavePrivada=0, e=0;
+	long clavePublica = 0;
+	do{
 		//Generacion del par de claves
 		//Paso 1: Generar dos numeros primos aleatorios GRANDES con el mismo tamaño.
 		long primoUno = damePrimo( numeroAleatorioEntre( 50000, 99999 )	);
@@ -209,38 +243,72 @@ long*encriptar(long mensaje){
 		
 		//Paso 2: Se calcula el producto entre los dos numeros
 		productoPrimos = ( primoUno * primoDos );
-		array[0] = productoPrimos;
 		
 		//Paso 3: Creacion de la clave publica.
-		long clavePublica = ( ( primoUno - 1 ) * ( primoDos - 1 ) );
+		clavePublica = ( ( primoUno - 1 ) * ( primoDos - 1 ) );
 		
 		//Paso 4: Seleccionamos un entero aleatorio 'e' tal que mcd('e',clavePublica) = 1   y   1 < 'e' < clavePublica
-		long e;
 		do{
 			e = numeroAleatorioEntre( 2, clavePublica );
 		}while( mcdEuclides( e, clavePublica ) != 1 );
 		
 		//Inverso Multiplicativo de "a" modulo "n"
 		exponenteClavePrivada = Inverso_Zn(e,clavePublica);
-		array[1]=exponenteClavePrivada;
 		
 		//Exponenciacion Modular
-		cifrado=Exponenciacion_Zn(mensaje,e,productoPrimos);
-		
-		array[2]=cifrado;
-	}
+		//cifrado=Exponenciacion_Zn(mensaje,e,productoPrimos);
+	}while(productoPrimos < 0 || exponenteClavePrivada < 0 );
 	
-	return array;
+	cout << "Clave Publica: " << productoPrimos << endl;
+	cout << "Clave Privada: " << exponenteClavePrivada << endl;
+	
+	//Representamos numericamente el mensaje
+	long int mensaje_int[ mensaje.size() ]; //Creamos un array con la misma cantidad de espacios que caracteres en nuestro mensaje.
+    
+    for ( int i = 0; i < mensaje.size(); i++ ){
+    	//Guardamos en el array un numero asignandolsele en base a la posicion del caracter en una variable.
+    	mensaje_int[i] = get_pos( alfabeto, mensaje.at( i ) ); 
+    }
+    
+    cout <<"Lo que usted ingreso, posee: ["<< mensaje.size()<<"] caracteres\n"<<endl;
+    	
+	for ( int i = 0; i < mensaje.size(); i++){
+		cout << "\t [" << mensaje.at(i) << "]: " << Exponenciacion_Zn( mensaje_int[i],e,productoPrimos) << endl;
+	}
+	cout<<"\nFin"<<endl;
 }
 
-/*
-	Esta funcion se ejecutaria desde el lado del servidor ya que como poseo la clave privada, 
-	con solo recibir el mensaje encriptado y la clave publica puedo desencriptar el mensaje.
-*/
-long desencriptar(long clavePublica, long clavePrivada, long mensajeCifrado){
-	long decifrado = Exponenciacion_Zn(mensajeCifrado,clavePrivada,clavePublica);
+void desencriptar(){
+	long clavePublica, clavePrivada;
+	int cantidadCaracteres;
 	
-	return decifrado;
+	cout << "Ingrese la Clave Publica: ";
+	cin >> clavePublica;
+	cout << "Ingrese la Clave Privada: ";
+	cin >> clavePrivada;
+	
+	cout << "Cuantos caracteres tiene el texto que ingreso?: ";
+	cin >> cantidadCaracteres;
+	
+	long int textoEncriptado[cantidadCaracteres];
+	
+	cout << "A continuacion ingrese los caracteres encriptados (incluyendo espacios ' '): "<<endl;
+	
+	for (int i = 0; i < cantidadCaracteres; i++){
+		cout << "[";
+		if( i < 10){
+			cout << "0";
+		}
+		cout << i << "]: ";
+		cin>>textoEncriptado[i];
+	}
+	
+	cout << "Su  mensaje desencriptado: \n"; 
+	for (int i = 0; i < cantidadCaracteres; i++){
+		cout << "\t" << textoEncriptado[i] << ": \t[" << alfabeto.at( Exponenciacion_Zn( textoEncriptado[i], clavePrivada, clavePublica ) ) << "] "<< endl;
+	}
+	
+	cout << "\n\n Fin de la desencriptacion \n\n";
 }
 
 int main(){
@@ -261,6 +329,10 @@ int main(){
 	long mensaje=0;
 	int respuesta=0;
 	
+	char mensajeAux[300];
+	string mensajeString;
+	
+		
 	do{
 			color(7);
 			cout<<"\t\t Que desea realizar?\n";
@@ -275,8 +347,23 @@ int main(){
 			if(respuesta==1){
 				color(3);
 				cout<<"\tUsted eligio encriptar un mensaje\n";
-				cout<<"\t---------------------------------\n\n";
+				cout<<"\t---------------------------------\n";
+							
+			    cout << "Ingrese el mensaje que desea encriptar (use guion bajo '_' en lugar de espacio ' '): "; color(9);
+			    //El cin.getLine "se confunde" ya que queda "colgado" un newLine y no lo ejecuta sin la llamada a esta funcion.
+			    //Link de problemas comunes usando cin.getLine: http://www.augustcouncil.com/~tgibson/tutorial/iotips.html#problems
+			    cin.ignore(); 
+			    //El "cin>>variable" no es util para leer cadenas de caracteres que contienen espacio entonces se utiliza getline.
+				cin.getline(mensajeAux, 300, '\n');
+			    
+				color(3);
 				
+				//Almaceno toda la cadena de caracteres en un string
+				mensajeString = mensajeAux;
+				
+				encriptar(mensajeString);
+							    
+				/*
 				cout<<"Ingrese el mensaje que desea encriptar: "; color(9);
 				cin>>mensaje;
 				color(3);
@@ -292,11 +379,14 @@ int main(){
 				cout<<" - Clave Publica: "; color(9); cout<<clavePublica<<"\n"; color(3);
 				
 				cout<<" - Clave Privada: "; color(9); cout<<clavePrivada<<"\n\n";
-				
+				*/
 			}else if(respuesta==2){
 				color(5);
 				cout<<"\tUsted eligio desencriptar un mensaje\n\n";
 				
+				desencriptar();
+				
+				/*
 				cout<<"Ingrese el mensaje a decifrar: "; color(4);
 				cin>>cifrado; color(5);
 				cout<<"Ingrese la clave publica: "; color(4);
@@ -305,7 +395,7 @@ int main(){
 				cin>>clavePrivada; color(5);
 				
 				cout<<"\n - El mensaje "; color(4); cout<<cifrado; color(5); cout<<" decifrado es "; color(4); cout<< desencriptar(clavePublica, clavePrivada, cifrado)<<"\n\n";
-				
+				*/				
 			}
 	}while(respuesta!=0);
 	
