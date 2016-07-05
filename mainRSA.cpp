@@ -13,6 +13,7 @@
 using namespace std; 
 using std::string; 
 
+//Esta variable se utiliza para poder asignarle un valor numerico a cada caracter
 string alfabeto( "&&ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz 0123456789" ); 
 
 //Cambiar el color de las letras
@@ -259,8 +260,10 @@ void encriptar(string mensaje){
 		//cifrado=Exponenciacion_Zn(mensaje,e,productoPrimos);
 	}while(productoPrimos < 0 || exponenteClavePrivada < 0 );
 	
-	cout << "Clave Publica: " << productoPrimos << endl;
-	cout << "Clave Privada: " << exponenteClavePrivada << endl;
+	cout << " Clave Publica: "; color(9); 
+	cout << productoPrimos << endl; color(3);
+	cout << " Clave Privada: "; color(9);
+	cout << exponenteClavePrivada << endl; color(3);
 	
 	//Representamos numericamente el mensaje
 	long int mensaje_int[ mensaje.size() ]; //Creamos un array con la misma cantidad de espacios que caracteres en nuestro mensaje.
@@ -270,43 +273,56 @@ void encriptar(string mensaje){
     	mensaje_int[i] = get_pos( alfabeto, mensaje.at( i ) ); 
     }
     
-    cout <<"Lo que usted ingreso, posee: ["<< mensaje.size()<<"] caracteres\n"<<endl;
+    cout <<"\n Lo que usted ingreso, posee: ["; color(9);  cout << mensaje.size(); color(3); cout << "] caracteres\n"<<endl;
     	
 	for ( int i = 0; i < mensaje.size(); i++){
-		cout << "\t [" << mensaje.at(i) << "]: " << Exponenciacion_Zn( mensaje_int[i],e,productoPrimos) << endl;
+		cout << "\t ["; color(9); cout << mensaje.at(i); color(3); cout << "]: " << Exponenciacion_Zn( mensaje_int[i],e,productoPrimos) << endl;
 	}
-	cout<<"\nFin"<<endl;
+	cout<<"\n Fin"<<endl;
 }
 
 void desencriptar(){
 	long clavePublica, clavePrivada;
 	int cantidadCaracteres;
 	
-	cout << "Ingrese la Clave Publica: ";
-	cin >> clavePublica;
-	cout << "Ingrese la Clave Privada: ";
-	cin >> clavePrivada;
+	cout << " Ingrese la Clave Publica: ";color(4);
+	cin >> clavePublica;color(5);
+	cout << " Ingrese la Clave Privada: ";color(4);
+	cin >> clavePrivada;color(5);
 	
-	cout << "Cuantos caracteres tiene el texto que ingreso?: ";
-	cin >> cantidadCaracteres;
+	cout << "\n Cuantos caracteres tiene el texto que ingreso?: ";color(4);
+	cin >> cantidadCaracteres;color(5);
 	
 	long int textoEncriptado[cantidadCaracteres];
 	
-	cout << "A continuacion ingrese los caracteres encriptados (incluyendo espacios ' '): "<<endl;
+	cout << "\n A continuacion ingrese los caracteres encriptados: "<<endl;
 	
 	for (int i = 0; i < cantidadCaracteres; i++){
-		cout << "[";
+		cout << "\t[";
 		if( i < 10){
 			cout << "0";
 		}
 		cout << i << "]: ";
+		color(4);
 		cin>>textoEncriptado[i];
+		color(5);
 	}
 	
-	cout << "Su  mensaje desencriptado: \n"; 
-	for (int i = 0; i < cantidadCaracteres; i++){
+	cout << "\n-----------------------\n";
+	cout << " Mensaje desencriptado:\n";
+	cout << "-----------------------\n";
+	
+	for ( int i = 0; i < cantidadCaracteres; i++ ){
 		cout << "\t" << textoEncriptado[i] << ": \t[" << alfabeto.at( Exponenciacion_Zn( textoEncriptado[i], clavePrivada, clavePublica ) ) << "] "<< endl;
 	}
+	
+	cout << "\n------------------\n";
+	cout << " Mensaje completo: ";
+	
+	for ( int i = 0; i < cantidadCaracteres; i++){
+		cout << alfabeto.at( Exponenciacion_Zn( textoEncriptado[i], clavePrivada, clavePublica ) );
+	}
+	cout << "\n------------------\t";
 	
 	cout << "\n\n Fin de la desencriptacion \n\n";
 }
@@ -349,9 +365,9 @@ int main(){
 				cout<<"\tUsted eligio encriptar un mensaje\n";
 				cout<<"\t---------------------------------\n";
 							
-			    cout << "Ingrese el mensaje que desea encriptar (use guion bajo '_' en lugar de espacio ' '): "; color(9);
+			    cout << "Ingrese el mensaje que desea encriptar: "; color(9);
 			    //El cin.getLine "se confunde" ya que queda "colgado" un newLine y no lo ejecuta sin la llamada a esta funcion.
-			    //Link de problemas comunes usando cin.getLine: http://www.augustcouncil.com/~tgibson/tutorial/iotips.html#problems
+			    //Link de problemas comunes usando cin. ...: http://www.augustcouncil.com/~tgibson/tutorial/iotips.html#problems
 			    cin.ignore(); 
 			    //El "cin>>variable" no es util para leer cadenas de caracteres que contienen espacio entonces se utiliza getline.
 				cin.getline(mensajeAux, 300, '\n');
@@ -362,40 +378,13 @@ int main(){
 				mensajeString = mensajeAux;
 				
 				encriptar(mensajeString);
-							    
-				/*
-				cout<<"Ingrese el mensaje que desea encriptar: "; color(9);
-				cin>>mensaje;
-				color(3);
-				
-				clavesEncriptacion = encriptar(mensaje);
-				
-				clavePublica = *clavesEncriptacion;
-				clavePrivada = * ( clavesEncriptacion + 1 );
-				cifrado = * ( clavesEncriptacion + 2 );
-				
-				cout<<"\n - El mensaje "; color(9); cout<<mensaje; color(3); cout<<" cifrado es: "; color(9); cout<<cifrado<<"\n\n"; color(3);
-				
-				cout<<" - Clave Publica: "; color(9); cout<<clavePublica<<"\n"; color(3);
-				
-				cout<<" - Clave Privada: "; color(9); cout<<clavePrivada<<"\n\n";
-				*/
+
 			}else if(respuesta==2){
 				color(5);
-				cout<<"\tUsted eligio desencriptar un mensaje\n\n";
+				cout<<"\tUsted eligio desencriptar un mensaje\n";
+				cout<<"\t------------------------------------\n";
 				
-				desencriptar();
-				
-				/*
-				cout<<"Ingrese el mensaje a decifrar: "; color(4);
-				cin>>cifrado; color(5);
-				cout<<"Ingrese la clave publica: "; color(4);
-				cin>>clavePublica; color(5);
-				cout<<"Ingrese la clave privada: "; color(4);
-				cin>>clavePrivada; color(5);
-				
-				cout<<"\n - El mensaje "; color(4); cout<<cifrado; color(5); cout<<" decifrado es "; color(4); cout<< desencriptar(clavePublica, clavePrivada, cifrado)<<"\n\n";
-				*/				
+				desencriptar();			
 			}
 	}while(respuesta!=0);
 	
