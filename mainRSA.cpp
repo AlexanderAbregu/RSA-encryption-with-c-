@@ -1,7 +1,7 @@
 #include <iostream> 
-#include <windows.h> //Agregado para cambiar el color
-#include <cmath> //Funciones matematicas: sqrt
-#include <string>
+#include <windows.h> // Agregado para cambiar el color.
+#include <cmath> // Funciones matematicas.
+#include <string> // Encriptar palabras.
 
 /*
  * Programar un encriptador de palabras mediante el metodo RSA,
@@ -197,42 +197,21 @@ unsigned long long  Exponenciacion_Zn(unsigned long long  a,unsigned long long  
 	return b;
 }
 
-/*
-	Encripta el mensaje y retorna en un array de 3 posiciones:
-	[0] = Clave Publica.
-	[1] = Clave Privada.
-	[2] = Mensaje encriptado.
-*/
-
-int get_pos( string str, char elemento ){
-	for( int i = 0; i<str.size(  ); i++ ){
-  		if( str.at( i ) == elemento ){
+// Retorna el numero de posicion donde se encuentra un caracter en una variable del tipo string
+int get_pos( string texto, char elemento ){
+	//Recorro tantas veces como caracteres en el string
+	for( int i = 0; i < texto.size(); i++ ){
+		//Si el ( caracter [i] == elemento ) => retornarmos [i] que seria la posicion donde se encontro.
+  		if( texto.at( i ) == elemento ){
       		return i;
 	  	}
   	}
-   	return -1;    
+   	return -1;
 }
 
-//El espacio no se cuenta asi que hay que eliminbarlo
-string  validar_mensaje( string texto_plano ){
-	string texto_plano_valido = ""; 
-  
-	//Eliminamos los espacios del texto plano
-  	for( int i = 0; i < texto_plano.size(); i++ ){
-  		if( texto_plano.at( i ) != ' ' ){
-  			texto_plano_valido += texto_plano.at( i ); 
-		}
-	}
-          
- 	//Completamos con x al final para que sea potencia de 2
-   	int tam = texto_plano_valido.size(); 
-   	if( tam % 2 != 0 ){
-   		texto_plano_valido += "x";	
-	}
-    
-	return texto_plano_valido; 
-}
-
+/*  
+	Las funciones encriptar() y desencriptar(), hacen uso de distintas funciones que se encuentran declaradas mas arriba.
+*/
 void encriptar(string mensaje){
 	long cifrado=0, productoPrimos=0, exponenteClavePrivada=0, e=0;
 	long clavePublica = 0;
@@ -262,23 +241,27 @@ void encriptar(string mensaje){
 	
 	cout << " Clave Publica: "; color(9); 
 	cout << productoPrimos << endl; color(3);
+	
 	cout << " Clave Privada: "; color(9);
 	cout << exponenteClavePrivada << endl; color(3);
 	
 	//Representamos numericamente el mensaje
-	long int mensaje_int[ mensaje.size() ]; //Creamos un array con la misma cantidad de espacios que caracteres en nuestro mensaje.
+	unsigned long long mensaje_int[ mensaje.size() ]; //Creamos un array con la misma cantidad de espacios que caracteres en nuestro mensaje.
     
     for ( int i = 0; i < mensaje.size(); i++ ){
-    	//Guardamos en el array un numero asignandolsele en base a la posicion del caracter en una variable.
+    	//Guardamos en cada posicion del array un numero en base a la posicion del caracter en una variable.
     	mensaje_int[i] = get_pos( alfabeto, mensaje.at( i ) ); 
     }
     
-    cout <<"\n Lo que usted ingreso, posee: ["; color(9);  cout << mensaje.size(); color(3); cout << "] caracteres\n"<<endl;
+    cout <<"\n Lo que usted ingreso, posee: ["; color(9);  
+		cout << mensaje.size(); color(3); 
+			cout << "] caracteres\n"<<endl;
     	
+    // Mostramos en la consola	
 	for ( int i = 0; i < mensaje.size(); i++){
 		cout << "\t ["; color(9); cout << mensaje.at(i); color(3); cout << "]: " << Exponenciacion_Zn( mensaje_int[i],e,productoPrimos) << endl;
 	}
-	cout<<"\n Fin"<<endl;
+	cout<<"\n Fin de la encriptacion."<<endl;
 }
 
 void desencriptar(){
@@ -287,22 +270,30 @@ void desencriptar(){
 	
 	cout << " Ingrese la Clave Publica: ";color(4);
 	cin >> clavePublica;color(5);
+	
 	cout << " Ingrese la Clave Privada: ";color(4);
 	cin >> clavePrivada;color(5);
 	
+	//En base a este dato sera la cantidad de veces que pidamos algun caracter encriptado.
 	cout << "\n Cuantos caracteres tiene el texto que ingreso?: ";color(4);
 	cin >> cantidadCaracteres;color(5);
 	
-	long int textoEncriptado[cantidadCaracteres];
+	/*
+		Se hace uso del unsigned long long porque se ingresaran numeros que representan caracteres encriptados y pueden tenes tamaños grandes.
+		int corto; // Entero de 32 bits 
+		unsigned long long largo; // Entero de 64 bits 
+	*/
+	unsigned long long textoEncriptado[cantidadCaracteres];
 	
 	cout << "\n A continuacion ingrese los caracteres encriptados: "<<endl;
 	
+	// Repetimos tantas veces como cantidad de caracteres tenga la palabra / oracion y guardamos en un array.
 	for (int i = 0; i < cantidadCaracteres; i++){
 		cout << "\t[";
-		if( i < 10){
+		if( ( i + 1 ) < 10){
 			cout << "0";
 		}
-		cout << i << "]: ";
+		cout << ( i + 1 ) << "]: ";
 		color(4);
 		cin>>textoEncriptado[i];
 		color(5);
@@ -312,6 +303,7 @@ void desencriptar(){
 	cout << " Mensaje desencriptado:\n";
 	cout << "-----------------------\n";
 	
+	// Repetimos tantas veces como cantidad de caracteres tenga la palabra / oracion y a medida que mostramos, desencriptamos.
 	for ( int i = 0; i < cantidadCaracteres; i++ ){
 		cout << "\t" << textoEncriptado[i] << ": \t[" << alfabeto.at( Exponenciacion_Zn( textoEncriptado[i], clavePrivada, clavePublica ) ) << "] "<< endl;
 	}
@@ -319,12 +311,15 @@ void desencriptar(){
 	cout << "\n------------------\n";
 	cout << " Mensaje completo: ";
 	
+	// Mostramos todo el mensaje carcter al lado de caracter sin saltos de linea ni nada. 
+	color(6);
 	for ( int i = 0; i < cantidadCaracteres; i++){
 		cout << alfabeto.at( Exponenciacion_Zn( textoEncriptado[i], clavePrivada, clavePublica ) );
 	}
+	color(5);
 	cout << "\n------------------\t";
 	
-	cout << "\n\n Fin de la desencriptacion \n\n";
+	cout << "\n\n Fin de la desencriptacion.\n\n";
 }
 
 int main(){
@@ -348,7 +343,7 @@ int main(){
 	char mensajeAux[300];
 	string mensajeString;
 	
-		
+	//Este ciclo se va a repetir constantemente hasta que el usuario selecione salir del programa.
 	do{
 			color(7);
 			cout<<"\t\t Que desea realizar?\n";
